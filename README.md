@@ -2,13 +2,22 @@
 
 Bridge plugin between [LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim) and [lightline](https://github.com/itchyny/lightline.vim) to show linter indicators on status line.
 
-This is inspired by [lightline-lsc-nvim](https://github.com/Palpatineli/lightline-lsc-nvim) and [lightline-ale](https://github.com/maximbaz/lightline-ale).
+(Inspired by [lightline-lsc-nvim](https://github.com/Palpatineli/lightline-lsc-nvim) and [lightline-ale](https://github.com/maximbaz/lightline-ale))
 
+## Why need this?
+Other plugins and example codes are using `getqflist()` to get diagnostic results. However, it is not applicable for `fzf`/`Location-list`/`Disabled` settings in LanguageClient-neovim.
+
+To support any kind of diagnostic lists, this plugin parsing raw state of LanguageClient-neovim.
 
 ## Installation
 
 ```viml
 call dein#add('takiyu/lightline-languageclient.vim')
+```
+or
+```toml
+[[plugins]]
+repo = 'takiyu/lightline-languageclient.vim'
 ```
 
 ## Dependency
@@ -16,7 +25,6 @@ call dein#add('takiyu/lightline-languageclient.vim')
 * itchyny/lightline.vim
 
 ## Configurations
-
 ### Lightline components
 ```viml
 let g:lightline = {}
