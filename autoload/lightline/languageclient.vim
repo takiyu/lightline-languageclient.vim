@@ -53,12 +53,15 @@ function! lightline#languageclient#errors() abort
     if lightline#languageclient#_isFailed()
         return s:indicator_fd
     endif
-    " Check error existence
-    let l:diag_list = lightline#languageclient#_getDiagList()
-    if len(l:diag_list) == 0
-        return ''
-    else
-        return lightline#languageclient#_countUpErrors(l:diag_list)
+    " Diagnostics indicator
+    if lightline#languageclient#_isLinted()
+        " Check error existence
+        let l:diag_list = lightline#languageclient#_getDiagList()
+        if len(l:diag_list) == 0
+            return ''
+        else
+            return lightline#languageclient#_countUpErrors(l:diag_list)
+        endif
     endif
 endfunction
 
@@ -70,12 +73,15 @@ function! lightline#languageclient#ok() abort
     if lightline#languageclient#_isNotSupported()
         return s:indicator_ns
     endif
-    " Check error existence
-    let l:diag_list = lightline#languageclient#_getDiagList()
-    if len(l:diag_list) == 0
-        return s:indicator_ok
-    else
-        return ''
+    " Diagnostics indicator
+    if lightline#languageclient#_isLinted()
+        " Check error existence
+        let l:diag_list = lightline#languageclient#_getDiagList()
+        if len(l:diag_list) == 0
+            return s:indicator_ok
+        else
+            return ''
+        endif
     endif
 endfunction
 
