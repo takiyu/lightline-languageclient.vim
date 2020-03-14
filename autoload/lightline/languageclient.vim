@@ -3,6 +3,7 @@
 " ------------------------------------------------------------------------------
 let s:indicator_ok = get(g:, 'lightline#languageclient#indicator_ok', 'OK')
 let s:indicator_ns = get(g:, 'lightline#languageclient#indicator_ns', 'N/S')
+let s:indicator_fd = get(g:, 'lightline#languageclient#indicator_ns', 'Failed')
 let s:indicator_e = get(g:, 'lightline#languageclient#indicator_e', 'E:%d')
 let s:indicator_w = get(g:, 'lightline#languageclient#indicator_w', 'W:%d')
 let s:indicator_i = get(g:, 'lightline#languageclient#indicator_i', 'I:%d')
@@ -11,8 +12,7 @@ let s:indicator_i = get(g:, 'lightline#languageclient#indicator_i', 'I:%d')
 " ------------------------------ Script Variables ------------------------------
 " ------------------------------------------------------------------------------
 let s:language_client_started = 0
-let s:last_diag_exists = 0
-let s:last_diag_failed = 0
+let s:last_diag_state = 0
 let s:last_diag_list = []
 let s:last_state_result_json = ''  " For Debug
 let s:last_state_result_raw = ''   " For Debug
@@ -49,8 +49,9 @@ function! lightline#languageclient#errors() abort
     if !lightline#languageclient#_isServerAlive()
         return ''
     endif
-    if !lightline#languageclient#_isFailed()
-        return 'Failed'
+    " Failed indicator
+    if lightline#languageclient#_isFailed()
+        return s:indicator_fd
     endif
     " Check error existence
     let l:diag_list = lightline#languageclient#_getDiagList()
@@ -65,7 +66,8 @@ function! lightline#languageclient#ok() abort
     if !lightline#languageclient#_isServerAlive()
         return ''
     endif
-    if !lightline#languageclient#_isLinted()
+    " Not-supported indicator
+    if lightline#languageclient#_isNotSupported()
         return s:indicator_ns
     endif
     " Check error existence
@@ -86,11 +88,15 @@ function! lightline#languageclient#_isServerAlive()
 endfunction
 
 function! lightline#languageclient#_isLinted()
-    return (s:last_diag_exists == 1)
+    return (s:last_diag_state == 1)
+endfunction
+
+function! lightline#languageclient#_isNotSupported()
+    return (s:last_diag_state == 0)
 endfunction
 
 function! lightline#languageclient#_isFailed()
-    return (s:last_diag_failed == 1)
+    return (s:last_diag_state == -1)
 endfunction
 
 function! lightline#languageclient#_getDiagList()
@@ -158,18 +164,15 @@ function! lightline#languageclient#_updateDiagListCallback(state)
         let l:diagnostics = l:result.diagnostics
         if has_key(l:diagnostics, l:full_filename)
             " Return
-            let s:last_diag_exists = 1
-            let s:last_diag_failed = 0
+            let s:last_diag_state = 1  " Success
             let s:last_diag_list = l:diagnostics[l:full_filename]
         else
-            let s:last_diag_exists = 0
-            let s:last_diag_failed = 0
+            let s:last_diag_state = 0  " Not supported
             let s:last_diag_list = []
         endif
     catch
         echohl 'Something wrong in LanguageClient state parsing for lightline'
-        let s:last_diag_exists = 0
-        let s:last_diag_failed = 1
+        let s:last_diag_state = -1  " Failed
         let s:last_diag_list = []
     endtry
 
