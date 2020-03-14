@@ -14,6 +14,7 @@ let s:language_client_started = 0
 let s:last_diag_exists = 0
 let s:last_diag_list = []
 let s:last_diag_raw_result = ''
+let s:last_diag_filename = ''
 
 " ------------------------------------------------------------------------------
 " -------------------------------- Entry Points --------------------------------
@@ -91,6 +92,10 @@ function! lightline#languageclient#_getDiagRawResult()
     return s:last_diag_raw_result
 endfunction
 
+function! lightline#languageclient#_getDiagFilename()
+    return s:last_diag_filename
+endfunction
+
 function! lightline#languageclient#_countUpErrors(diag_list) abort
     " Count up error and warn
     let l:n_err = 0
@@ -130,15 +135,17 @@ function! lightline#languageclient#_updateDiagListCallback(state)
     try
         " Restore result dictionary
         let l:result_str = a:state.result
-        let s:last_diag_raw_result = l:result_str
+        let s:last_diag_raw_result = l:result_str  " Store for debug
         let l:result = lightline#languageclient#_parseJsonString(l:result_str)
 
-        let full_filename = expand('%:p')
+        " Look up with current filename
+        let l:full_filename = expand('%:p')
+        let s:last_diag_filename = l:full_filename  " Store for debug
         let l:diagnostics = l:result.diagnostics
-        if has_key(l:diagnostics, full_filename)
+        if has_key(l:diagnostics, l:full_filename)
             " Return
             let s:last_diag_exists = 1
-            let s:last_diag_list = l:diagnostics[full_filename]
+            let s:last_diag_list = l:diagnostics[l:full_filename]
         else
             let s:last_diag_exists = 0
             let s:last_diag_list = []
