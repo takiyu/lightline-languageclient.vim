@@ -57,12 +57,11 @@ function! lightline#languageclient#errors() abort
     if lightline#languageclient#_isLinted()
         " Check error existence
         let l:diag_list = lightline#languageclient#_getDiagList()
-        if len(l:diag_list) == 0
-            return ''
-        else
+        if len(l:diag_list) != 0
             return lightline#languageclient#_countUpErrors(l:diag_list)
         endif
     endif
+    return ''
 endfunction
 
 function! lightline#languageclient#ok() abort
@@ -79,10 +78,9 @@ function! lightline#languageclient#ok() abort
         let l:diag_list = lightline#languageclient#_getDiagList()
         if len(l:diag_list) == 0
             return s:indicator_ok
-        else
-            return ''
         endif
     endif
+    return ''
 endfunction
 
 " ------------------------------------------------------------------------------
