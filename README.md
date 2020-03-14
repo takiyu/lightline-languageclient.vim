@@ -48,7 +48,7 @@ let g:lightline.active = {
 ### Indicators (optional)
 ```viml
 let g:lightline#languageclient#indicator_ok = 'OK'
-let g:lightline#languageclient#indicator_ns = 'N/S'
+let g:lightline#languageclient#indicator_lt = 'Linting'
 let g:lightline#languageclient#indicator_fd = 'Failed'
 let g:lightline#languageclient#indicator_e = 'E:%d'
 let g:lightline#languageclient#indicator_w = 'W:%d'

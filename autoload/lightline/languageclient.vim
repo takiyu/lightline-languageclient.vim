@@ -2,8 +2,8 @@
 " --------------------------- Configurable Variables ---------------------------
 " ------------------------------------------------------------------------------
 let s:indicator_ok = get(g:, 'lightline#languageclient#indicator_ok', 'OK')
-let s:indicator_ns = get(g:, 'lightline#languageclient#indicator_ns', 'N/S')
-let s:indicator_fd = get(g:, 'lightline#languageclient#indicator_ns', 'Failed')
+let s:indicator_lt = get(g:, 'lightline#languageclient#indicator_lt', 'Linting')
+let s:indicator_fd = get(g:, 'lightline#languageclient#indicator_fd', 'Failed')
 let s:indicator_e = get(g:, 'lightline#languageclient#indicator_e', 'E:%d')
 let s:indicator_w = get(g:, 'lightline#languageclient#indicator_w', 'W:%d')
 let s:indicator_i = get(g:, 'lightline#languageclient#indicator_i', 'I:%d')
@@ -69,8 +69,8 @@ function! lightline#languageclient#ok() abort
         return ''
     endif
     " Not-supported indicator
-    if lightline#languageclient#_isNotSupported()
-        return s:indicator_ns
+    if lightline#languageclient#_isLinting()
+        return s:indicator_lt
     endif
     " Diagnostics indicator
     if lightline#languageclient#_isLinted()
@@ -95,7 +95,7 @@ function! lightline#languageclient#_isLinted()
     return (s:last_diag_state == 1)
 endfunction
 
-function! lightline#languageclient#_isNotSupported()
+function! lightline#languageclient#_isLinting()
     return (s:last_diag_state == 0)
 endfunction
 
@@ -171,7 +171,7 @@ function! lightline#languageclient#_updateDiagListCallback(state)
             let s:last_diag_state = 1  " Success
             let s:last_diag_list = l:diagnostics[l:full_filename]
         else
-            let s:last_diag_state = 0  " Not supported
+            let s:last_diag_state = 0  " Linting (or Not supported?)
             let s:last_diag_list = []
         endif
     catch
