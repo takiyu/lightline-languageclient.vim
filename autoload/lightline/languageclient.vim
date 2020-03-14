@@ -58,7 +58,7 @@ function! lightline#languageclient#errors() abort
         " Check error existence
         let l:diag_list = lightline#languageclient#_getDiagList()
         if len(l:diag_list) != 0
-            return lightline#languageclient#_countUpErrors(l:diag_list)
+            return lightline#languageclient#_genErrorMessage(l:diag_list)
         endif
     endif
     return ''
@@ -119,6 +119,19 @@ function! lightline#languageclient#_getFilename()
     return s:last_filename
 endfunction
 
+function! lightline#languageclient#_genErrorMessage(diag_list)
+    " Generate basic error message
+    let l:error_msg = lightline#languageclient#_countUpErrors(a:diag_list)
+
+    " Add error line message
+    let l:line_no = lightline#languageclient#_obtainErrorLine(a:diag_list)
+    if 0 <= l:line_no
+        let l:error_msg = l:error_msg . printf("(L:%d)", l:line_no)
+    endif
+
+    return l:error_msg
+endfunction
+
 function! lightline#languageclient#_countUpErrors(diag_list)
     " Count up error and warn
     let l:n_err = 0
@@ -151,7 +164,7 @@ function! lightline#languageclient#_countUpErrors(diag_list)
 endfunction
 
 function! lightline#languageclient#_obtainErrorLine(diag_list)
-    " Search best answer
+    " Search minimum line numbers
     let l:line_no_dict = {}
     let l:err_ln = -1
     let l:warn_ln = -1
@@ -160,26 +173,23 @@ function! lightline#languageclient#_obtainErrorLine(diag_list)
         let l:key = item["severity"]
         let l:line_no = item["range"]["start"]
         if has_key(l:line_no_dict, l:key)
-            let l:line_no_prev = l:line_no_dict[l:key]
-            if l:line_no < l:line_no_prev
-                l:line_no_dict[l:key] = l:line_no
+            if l:line_no < l:line_no_dict[l:key]
+                l:line_no_dict[l:key] = l:line_no  " Set smaller value
             endif
         else
             l:line_no_dict[l:key] = l:line_no
         endif
     endfor
 
-    if has_key(l:line_no_dict, 1)
-        return l:line_no_dict[1]
-    elseif has_key(l:line_no_dict, 2)
-        return l:line_no_dict[2]
-    elseif has_key(l:line_no_dict, 3)
-        return l:line_no_dict[3]
-    elseif has_key(l:line_no_dict, 4)
-        return l:line_no_dict[4]
-    else
-        return -1
-    endif
+    " Return most important error
+    for severity in [1, 2, 3, 4]
+        if has_key(l:line_no_dict, 1)
+            return l:line_no_dict[1]
+        endif
+    endfor
+
+    " No error
+    return -1
 
 endfunction
 
