@@ -119,7 +119,7 @@ function! lightline#languageclient#_getFilename()
     return s:last_filename
 endfunction
 
-function! lightline#languageclient#_countUpErrors(diag_list) abort
+function! lightline#languageclient#_countUpErrors(diag_list)
     " Count up error and warn
     let l:n_err = 0
     let l:n_warn = 0
@@ -129,6 +129,8 @@ function! lightline#languageclient#_countUpErrors(diag_list) abort
             let l:n_err += 1
         elseif item["severity"] == 2
             let l:n_warn += 1
+        elseif item["severity"] == 3
+            let l:n_info += 1
         else
             let l:n_info += 1
         endif
@@ -146,6 +148,39 @@ function! lightline#languageclient#_countUpErrors(diag_list) abort
     endif
     " Return message
     return join(l:items, ', ')
+endfunction
+
+function! lightline#languageclient#_obtainErrorLine(diag_list)
+    " Search best answer
+    let l:line_no_dict = {}
+    let l:err_ln = -1
+    let l:warn_ln = -1
+    let l:info_ln = -1
+    for item in a:diag_list
+        let l:key = item["severity"]
+        let l:line_no = item["range"]["start"]
+        if has_key(l:line_no_dict, l:key)
+            let l:line_no_prev = l:line_no_dict[l:key]
+            if l:line_no < l:line_no_prev
+                l:line_no_dict[l:key] = l:line_no
+            endif
+        else
+            l:line_no_dict[l:key] = l:line_no
+        endif
+    endfor
+
+    if has_key(l:line_no_dict, 1)
+        return l:line_no_dict[1]
+    elseif has_key(l:line_no_dict, 2)
+        return l:line_no_dict[2]
+    elseif has_key(l:line_no_dict, 3)
+        return l:line_no_dict[3]
+    elseif has_key(l:line_no_dict, 4)
+        return l:line_no_dict[4]
+    else
+        return -1
+    endif
+
 endfunction
 
 function! lightline#languageclient#_updateDiagList() abort
