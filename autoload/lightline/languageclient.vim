@@ -12,6 +12,7 @@ let s:indicator_i = get(g:, 'lightline#languageclient#indicator_i', 'I:%d')
 " ------------------------------------------------------------------------------
 let s:language_client_started = 0
 let s:last_diag_exists = 0
+let s:last_diag_failed = 0
 let s:last_diag_list = []
 let s:last_state_result_json = ''  " For Debug
 let s:last_state_result_raw = ''   " For Debug
@@ -48,6 +49,9 @@ function! lightline#languageclient#errors() abort
     if !lightline#languageclient#_isServerAlive()
         return ''
     endif
+    if !lightline#languageclient#_isFailed()
+        return 'Failed'
+    endif
     " Check error existence
     let l:diag_list = lightline#languageclient#_getDiagList()
     if len(l:diag_list) == 0
@@ -61,11 +65,11 @@ function! lightline#languageclient#ok() abort
     if !lightline#languageclient#_isServerAlive()
         return ''
     endif
-    " Check error existence
-    let l:diag_list = lightline#languageclient#_getDiagList()
     if !lightline#languageclient#_isLinted()
         return s:indicator_ns
     endif
+    " Check error existence
+    let l:diag_list = lightline#languageclient#_getDiagList()
     if len(l:diag_list) == 0
         return s:indicator_ok
     else
@@ -83,6 +87,10 @@ endfunction
 
 function! lightline#languageclient#_isLinted()
     return (s:last_diag_exists == 1)
+endfunction
+
+function! lightline#languageclient#_isFailed()
+    return (s:last_diag_failed == 1)
 endfunction
 
 function! lightline#languageclient#_getDiagList()
@@ -151,14 +159,17 @@ function! lightline#languageclient#_updateDiagListCallback(state)
         if has_key(l:diagnostics, l:full_filename)
             " Return
             let s:last_diag_exists = 1
+            let s:last_diag_failed = 0
             let s:last_diag_list = l:diagnostics[l:full_filename]
         else
             let s:last_diag_exists = 0
+            let s:last_diag_failed = 0
             let s:last_diag_list = []
         endif
     catch
         echohl 'Something wrong in LanguageClient state parsing for lightline'
         let s:last_diag_exists = 0
+        let s:last_diag_failed = 1
         let s:last_diag_list = []
     endtry
 
@@ -173,7 +184,7 @@ function! lightline#languageclient#_parseJsonString(src_str) abort
     let l:json_str = substitute(l:json_str, "false", "0", "g")
     let l:json_str = substitute(l:json_str, "null", "\"\"", "g")
     let l:json_str = substitute(l:json_str, "undefined", "\"\"", "g")
-    let l:json_str = substitute(l:json_str, "\n", " ", "g")
+    let l:json_str = substitute(l:json_str, "\\n", " ", "g")
     " Convert string to dictionary
     let l:json_dict = eval(l:json_str)
     return l:json_dict
