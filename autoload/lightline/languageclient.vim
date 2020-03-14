@@ -126,7 +126,7 @@ function! lightline#languageclient#_genErrorMessage(diag_list)
     " Add error line message
     let l:line_no = lightline#languageclient#_obtainErrorLine(a:diag_list)
     if 0 <= l:line_no
-        let l:error_msg = l:error_msg . printf("(L:%d)", l:line_no)
+        let l:error_msg = l:error_msg . printf(" (L:%d)", l:line_no + 1)
     endif
 
     return l:error_msg
