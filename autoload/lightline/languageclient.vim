@@ -185,14 +185,6 @@ function! lightline#languageclient#_updateDiagListCallback(state)
 endfunction
 
 function! lightline#languageclient#_parseJsonString(src_str) abort
-    " Replace invalid values for VimScript
-    let l:json_str = a:src_str
-    let l:json_str = substitute(l:json_str, "true", "1", "g")
-    let l:json_str = substitute(l:json_str, "false", "0", "g")
-    let l:json_str = substitute(l:json_str, "null", "\"\"", "g")
-    let l:json_str = substitute(l:json_str, "undefined", "\"\"", "g")
-    let l:json_str = substitute(l:json_str, "\\n", " ", "g")
     " Convert string to dictionary
-    let l:json_dict = eval(l:json_str)
-    return l:json_dict
+    return json_decode(a:src_str)
 endfunction
