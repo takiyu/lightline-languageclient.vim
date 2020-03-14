@@ -13,8 +13,9 @@ let s:indicator_i = get(g:, 'lightline#languageclient#indicator_i', 'I:%d')
 let s:language_client_started = 0
 let s:last_diag_exists = 0
 let s:last_diag_list = []
-let s:last_diag_raw_result = ''
-let s:last_diag_filename = ''
+let s:last_state_result_json = ''  " For Debug
+let s:last_state_result_raw = ''   " For Debug
+let s:last_filename = ''     " For Debug
 
 " ------------------------------------------------------------------------------
 " -------------------------------- Entry Points --------------------------------
@@ -88,12 +89,16 @@ function! lightline#languageclient#_getDiagList()
     return s:last_diag_list
 endfunction
 
-function! lightline#languageclient#_getDiagRawResult()
-    return s:last_diag_raw_result
+function! lightline#languageclient#_getStateResultRaw()
+    return s:last_state_result_raw
 endfunction
 
-function! lightline#languageclient#_getDiagFilename()
-    return s:last_diag_filename
+function! lightline#languageclient#_getStateResultJson()
+    return s:last_state_result_json
+endfunction
+
+function! lightline#languageclient#_getFilename()
+    return s:last_filename
 endfunction
 
 function! lightline#languageclient#_countUpErrors(diag_list) abort
@@ -135,12 +140,13 @@ function! lightline#languageclient#_updateDiagListCallback(state)
     try
         " Restore result dictionary
         let l:result_str = a:state.result
-        let s:last_diag_raw_result = l:result_str  " Store for debug
+        let s:last_state_result_raw = l:result_str  " Store for debug
         let l:result = lightline#languageclient#_parseJsonString(l:result_str)
+        let s:last_state_result_json = l:result  " Store for debug
 
         " Look up with current filename
         let l:full_filename = expand('%:p')
-        let s:last_diag_filename = l:full_filename  " Store for debug
+        let s:last_filename = l:full_filename  " Store for debug
         let l:diagnostics = l:result.diagnostics
         if has_key(l:diagnostics, l:full_filename)
             " Return
