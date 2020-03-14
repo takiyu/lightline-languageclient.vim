@@ -13,6 +13,7 @@ let s:indicator_i = get(g:, 'lightline#languageclient#indicator_i', 'I:%d')
 let s:language_client_started = 0
 let s:last_diag_exists = 0
 let s:last_diag_list = []
+let s:last_diag_raw_result = ''
 
 " ------------------------------------------------------------------------------
 " -------------------------------- Entry Points --------------------------------
@@ -86,6 +87,10 @@ function! lightline#languageclient#_getDiagList()
     return s:last_diag_list
 endfunction
 
+function! lightline#languageclient#_getDiagRawResult()
+    return s:last_diag_raw_result
+endfunction
+
 function! lightline#languageclient#_countUpErrors(diag_list) abort
     " Count up error and warn
     let l:n_err = 0
@@ -125,6 +130,7 @@ function! lightline#languageclient#_updateDiagListCallback(state)
     try
         " Restore result dictionary
         let l:result_str = a:state.result
+        let s:last_diag_raw_result = l:result_str
         let l:result = lightline#languageclient#_parseJsonString(l:result_str)
 
         let full_filename = expand('%:p')
