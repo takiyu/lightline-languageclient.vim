@@ -171,7 +171,7 @@ function! lightline#languageclient#_obtainErrorLine(diag_list)
     let l:info_ln = -1
     for item in a:diag_list
         let l:key = item["severity"]
-        let l:line_no = item["range"]["start"]
+        let l:line_no = item["range"]["start"]["line"]
         if has_key(l:line_no_dict, l:key)
             if l:line_no < l:line_no_dict[l:key]
                 let l:line_no_dict[l:key] = l:line_no  " Set smaller value
